@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chúc Mừng 8/3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffd4e5 0%, #ffb3d9 50%, #ffc9e3 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            opacity: 1;
+            pointer-events: none;
+        }
+
+        .heart svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 5px rgba(255, 105, 180, 0.5));
+        }
+
+        .big-heart {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 200px;
+            height: 200px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .big-heart.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .big-heart svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 30px rgba(255, 105, 180, 0.8));
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .message {
+            position: fixed;
+            top: 65%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff0066;
+            text-align: center;
+            z-index: 1001;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-shadow: 
+                2px 2px 4px rgba(255, 255, 255, 0.8),
+                -2px -2px 4px rgba(255, 0, 102, 0.3),
+                0 0 20px rgba(255, 105, 180, 0.5);
+            white-space: nowrap;
+        }
+
+        .message.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(-20px) scale(1);
+            }
+        }
+
+        .instruction {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: #ff0066;
+            text-align: center;
+            z-index: 100;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 192, 203, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <div class="big-heart" id="bigHeart">
+        <svg viewBox="0 0 32 29.6">
+            <defs>
+                <linearGradient id="bigHeartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff0066;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#ff66b3;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#ff3385;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#bigHeartGradient)" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+        </svg>
+    </div>
+    <div class="message" id="message">HAPPY WOMEN'S DAY 💕</div>
+    <div class="instruction" id="instruction">click in the screen ✨</div>
+
+    <script>
+        let hasClicked = false;
+        let hearts = [];
+        let animationFrames = [];
+
+        // Tạo trái tim bay tự động
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            
+            // Kích thước ngẫu nhiên
+            const size = Math.random() * 30 + 15;
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+            
+            // Vị trí xuất phát ngẫu nhiên
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+            heart.style.left = startX + 'px';
+            heart.style.top = startY + 'px';
+            
+            // Màu gradient ngẫu nhiên
+            const gradients = [
+                ['#ff1493', '#ff69b4', '#ff4d94'],
+                ['#ff0066', '#ff66b3', '#ff3385'],
+                ['#ff007f', '#ff85c2', '#ff4d94'],
+                ['#dc143c', '#ff6b9d', '#ff1e56']
+            ];
+            const colors = gradients[Math.floor(Math.random() * gradients.length)];
+            const gradientId = 'gradient' + Math.random().toString(36).substr(2, 9);
+            
+            // Tạo SVG trái tim
+            heart.innerHTML = `
+                <svg viewBox="0 0 32 29.6">
+                    <defs>
+                        <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:${colors[0]};stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:${colors[1]};stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:${colors[2]};stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#${gradientId})" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+                </svg>
+            `;
+            
+            document.body.appendChild(heart);
+            
+            const heartData = {
+                element: heart,
+                x: startX,
+                y: startY,
+                size: size,
+                velocityX: (Math.random() - 0.5) * 2,
+                velocityY: (Math.random() - 0.5) * 2
+            };
+            
+            hearts.push(heartData);
+            
+            return heartData;
+        }
+
+        // Animation trái tim bay
+        function animateFloatingHearts() {
+            if (hasClicked) return;
+            
+            hearts.forEach(heartData => {
+                // Cập nhật vị trí
+                heartData.x += heartData.velocityX;
+                heartData.y += heartData.velocityY;
+                
+                // Bounce off edges
+                if (heartData.x < 0 || heartData.x > window.innerWidth) {
+                    heartData.velocityX *= -1;
+                    heartData.x = Math.max(0, Math.min(window.innerWidth, heartData.x));
+                }
+                if (heartData.y < 0 || heartData.y > window.innerHeight) {
+                    heartData.velocityY *= -1;
+                    heartData.y = Math.max(0, Math.min(window.innerHeight, heartData.y));
+                }
+                
+                // Cập nhật DOM - không xoay
+                heartData.element.style.left = heartData.x + 'px';
+                heartData.element.style.top = heartData.y + 'px';
+                heartData.element.style.opacity = '0.9';
+            });
+            
+            const frameId = requestAnimationFrame(animateFloatingHearts);
+            animationFrames.push(frameId);
+        }
+
+        // Khởi tạo trái tim ban đầu
+        function initHearts() {
+            const numHearts = 40; // Số lượng trái tim bay
+            for (let i = 0; i < numHearts; i++) {
+                createFloatingHeart();
+            }
+            animateFloatingHearts();
+        }
+
+        // Tụ trái tim về giữa màn hình
+        function gatherHearts() {
+            if (hasClicked) return;
+            hasClicked = true;
+            
+            // Dừng animation ngay lập tức
+            animationFrames.forEach(frame => cancelAnimationFrame(frame));
+            animationFrames = [];
+            
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // Đảm bảo tất cả trái tim hiện có đều được tụ lại
+            const currentHearts = [...hearts];
+            
+            currentHearts.forEach((heartData, index) => {
+                setTimeout(() => {
+                    if (heartData.element && heartData.element.parentNode) {
+                        heartData.element.style.transition = 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                        heartData.element.style.left = centerX + 'px';
+                        heartData.element.style.top = centerY + 'px';
+                        heartData.element.style.opacity = '0';
+                        heartData.element.style.transform = 'scale(0.3)';
+                    }
+                }, index * 15);
+            });
+            
+            // Sau khi tụ xong, hiện trái tim lớn và chữ
+            setTimeout(() => {
+                currentHearts.forEach(heartData => {
+                    if (heartData.element && heartData.element.parentNode) {
+                        heartData.element.remove();
+                    }
+                });
+                hearts = [];
+                
+                document.getElementById('overlay').classList.add('show');
+                document.getElementById('bigHeart').classList.add('show');
+                document.getElementById('message').classList.add('show');
+                document.getElementById('instruction').style.display = 'none';
+                
+                // Tạo hiệu ứng pháo hoa trái tim
+                createFireworks();
+            }, 1200);
+        }
+
+        // Xử lý click
+        document.body.addEventListener('click', function(e) {
+            if (hasClicked) return;
+            gatherHearts();
+        });
+
+        // Tạo hiệu ứng pháo hoa trái tim
+        function createFireworks() {
+            setInterval(() => {
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight * 0.3;
+                
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        const angle = (Math.PI * 2 * i) / 10;
+                        const velocity = 100;
+                        const heart = document.createElement('div');
+                        heart.className = 'heart';
+                        heart.style.width = '15px';
+                        heart.style.height = '15px';
+                        heart.style.left = x + 'px';
+                        heart.style.top = y + 'px';
+                        
+                        const gradientId = 'fw' + Math.random().toString(36).substr(2, 9);
+                        heart.innerHTML = `
+                            <svg viewBox="0 0 32 29.6">
+                                <defs>
+                                    <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#ff0066;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#ff66b3;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#ff3385;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <path fill="url(#${gradientId})" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+                            </svg>
+                        `;
+                        
+                        document.body.appendChild(heart);
+                        
+                        let posX = x;
+                        let posY = y;
+                        let velX = Math.cos(angle) * velocity;
+                        let velY = Math.sin(angle) * velocity;
+                        let opacity = 1;
+                        
+                        function animateFirework() {
+                            posX += velX * 0.05;
+                            posY += velY * 0.05;
+                            velY += 2; // Gravity
+                            opacity -= 0.02;
+                            
+                            heart.style.left = posX + 'px';
+                            heart.style.top = posY + 'px';
+                            heart.style.opacity = opacity;
+                            
+                            if (opacity > 0) {
+                                requestAnimationFrame(animateFirework);
+                            } else {
+                                heart.remove();
+                            }
+                        }
+                        
+                        animateFirework();
+                    }, i * 50);
+                }
+            }, 2000);
+        }
+
+        // Khởi động khi trang load
+        window.addEventListener('load', initHearts);
+    </script>
+</body>
+</html>
